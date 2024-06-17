@@ -5,6 +5,7 @@ defaults:
   - _self_  # make sure override
 
 runner:
+  num_workers: 2
   checkpointing_steps: 5
   validation_steps: 5
   max_train_steps: 7  # if set, will ignore epoch num and break

@@ -17,4 +17,4 @@ opencv-python==4.6.0.66  # visualization requires >=4.5.5.64
 gradio==4.16.0
 
 diffusers==0.17.1
-xformers==0.0.16
+#xformers==0.0.19

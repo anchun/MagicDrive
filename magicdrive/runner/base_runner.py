@@ -131,7 +131,7 @@ class BaseRunner:
                 collate_fn=partial(
                     collate_fn, is_train=True, **collate_fn_param),
                 batch_size=self.cfg.runner.train_batch_size,
-                num_workers=self.cfg.runner.num_workers, pin_memory=True,
+                num_workers=self.cfg.runner.num_workers, pin_memory=False,
                 prefetch_factor=self.cfg.runner.prefetch_factor,
                 persistent_workers=True,
             )
@@ -340,6 +340,7 @@ class BaseRunner:
             f"Starting from epoch {first_epoch} to {self.cfg.runner.num_train_epochs}")
         for epoch in range(first_epoch, self.cfg.runner.num_train_epochs):
             for step, batch in enumerate(self.train_dataloader):
+                print("step:", step, "global_step:", global_step)
                 loss = self._train_one_stop(batch)
                 if not loss.isfinite():
                     raise RuntimeError('Your loss is NaN.')
