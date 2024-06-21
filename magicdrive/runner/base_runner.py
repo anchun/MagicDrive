@@ -135,7 +135,7 @@ class BaseRunner:
                 collate_fn=partial(
                     collate_fn, is_train=True, **collate_fn_param),
                 batch_size=self.cfg.runner.train_batch_size,
-                num_workers=self.cfg.runner.num_workers, pin_memory=True,
+                num_workers=self.cfg.runner.num_workers, pin_memory=False,
                 prefetch_factor=self.cfg.runner.prefetch_factor,
                 persistent_workers=True,
             )
