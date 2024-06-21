@@ -10,8 +10,8 @@ transformers==4.27.4  # for diffusers
 
 Pillow==8.4.0
 numpy==1.22.0
-numba==0.48.0  # for numpy==1.21.6
-llvmlite==0.31.0
+numba==0.53.0
+llvmlite==0.36.0
 opencv-python==4.6.0.66  # visualization requires >=4.5.5.64
 
 gradio==4.16.0

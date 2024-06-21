@@ -340,7 +340,7 @@ class BaseRunner:
             f"Starting from epoch {first_epoch} to {self.cfg.runner.num_train_epochs}")
         for epoch in range(first_epoch, self.cfg.runner.num_train_epochs):
             for step, batch in enumerate(self.train_dataloader):
-                print("step:", step, "global_step:", global_step)
+                #print("step:", step, "global_step:", global_step)
                 loss = self._train_one_stop(batch)
                 if not loss.isfinite():
                     raise RuntimeError('Your loss is NaN.')
