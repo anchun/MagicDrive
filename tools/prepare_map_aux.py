@@ -84,8 +84,9 @@ def main(cfg: DictConfig):
     set_seed(cfg.seed)
 
     # add subfix
-    if not hasattr(cfg, "subfix"):
-        cfg.subfix = "_tmp"
+    subfix = "_tmp"
+    if hasattr(cfg, "subfix"):
+        subfix = cfg.subfix
 
     # amend cfg for data
     cfg.dataset.train_pipeline[-1]["keys"].append("gt_masks_bev_static")
@@ -128,7 +129,7 @@ def main(cfg: DictConfig):
 
     # NOTE: if with h5py <= 3.4, it will track timestamp, which make file hash
     # different. ref: https://github.com/h5py/h5py/pull/1958
-    with h5py.File(f"{cfg.process}_{cfg.subfix}.h5", "w") as h5:
+    with h5py.File(f"{cfg.process}_{subfix}.h5", "w") as h5:
         for batch in tqdm(loader):
             for data in batch:
                 for datai in data:
