@@ -39,8 +39,8 @@ lr_power: 1.0
 
 # steps parameter
 lr_warmup_steps: 3000
-checkpointing_steps: 500
-validation_steps: 100
+checkpointing_steps: 50000
+validation_steps: 10000
 save_model_per_epoch: null
 
 # validation

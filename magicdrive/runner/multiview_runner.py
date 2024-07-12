@@ -3,9 +3,12 @@ import os
 import contextlib
 from omegaconf import OmegaConf
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch import autograd
 from einops import rearrange, repeat
 
 from diffusers import (
@@ -56,6 +59,9 @@ class ControlnetUnetWrapper(ModelMixin):
             **kwargs,
         )
         # fmt: on
+        assert not any(torch.isnan(sample).any() for sample in down_block_res_samples), "controlnet_unet down_block_res_samples contains NaNs"
+        assert not torch.isnan(mid_block_res_sample).any(), "controlnet_unet mid_block_res_samples contains NaNs"
+        assert not torch.isnan(encoder_hidden_states_with_cam).any(), "controlnet_unet encoder_hidden_states_with_cam contains NaNs"
 
         # starting from here, we use (B n) as batch_size
         noisy_latents = rearrange(noisy_latents, "b n ... -> (b n) ...")
@@ -87,8 +93,11 @@ class ControlnetUnetWrapper(ModelMixin):
                     dtype=self.weight_dtype
                 ),  # b x n, 1280, h, w. we have 4 x 7 as mid_block_res
             ).sample
+        assert not torch.isnan(model_pred).any(), "controlnet_unet model_pred before rearrange contains NaNs"
 
         model_pred = rearrange(model_pred, "(b n) ... -> b n ...", n=N_cam)
+        assert not torch.isnan(model_pred).any(), "controlnet_unet model_pred after rearrange contains NaNs"
+        
         return model_pred
 
 
@@ -242,6 +251,7 @@ class MultiviewRunner(BaseRunner):
         logging.info(f"Save your model to: {root}")
 
     def _train_one_stop(self, batch):
+        # autograd.set_detect_anomaly(True)
         self.controlnet_unet.train()
         with self.accelerator.accumulate(self.controlnet_unet):
             N_cam = batch["pixel_values"].shape[1]
@@ -252,8 +262,11 @@ class MultiviewRunner(BaseRunner):
                     dtype=self.weight_dtype
                 )
             ).latent_dist.sample()
+            # print(f"After encode: {latents.shape}")
             latents = latents * self.vae.config.scaling_factor
+            # print(f"After scaling: {latents.shape}")
             latents = rearrange(latents, "(b n) c h w -> b n c h w", n=N_cam)
+            # print(f"After rearrange: {latents.shape}")
 
             # embed camera params, in (B, 6, 3, 7), out (B, 6, 189)
             # camera_emb = self._embed_camera(batch["camera_param"])
@@ -302,6 +315,7 @@ class MultiviewRunner(BaseRunner):
                 encoder_hidden_states_uncond, controlnet_image,
                 **batch['kwargs'],
             )
+            assert not torch.isnan(model_pred).any(), "model_pred contains NaNs"
 
             # Get the target for loss depending on the prediction type
             if self.noise_scheduler.config.prediction_type == "epsilon":
@@ -313,12 +327,18 @@ class MultiviewRunner(BaseRunner):
                 raise ValueError(
                     f"Unknown prediction type {self.noise_scheduler.config.prediction_type}"
                 )
+            assert not torch.isnan(target).any(), "target contains NaNs"
 
+            # with autograd.detect_anomaly():
             loss = F.mse_loss(
                 model_pred.float(), target.float(), reduction='none')
+            assert not torch.isnan(loss).any(), "loss contains NaNs before mean"
             loss = loss.mean()
+            assert not torch.isnan(loss).any(), "loss contains NaNs after mean"
+                # loss = loss.mean() + 1e-8
 
             self.accelerator.backward(loss)
+
             if self.accelerator.sync_gradients:
                 params_to_clip = self.controlnet_unet.parameters()
                 self.accelerator.clip_grad_norm_(

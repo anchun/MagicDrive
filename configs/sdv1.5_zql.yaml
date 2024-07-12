@@ -4,6 +4,7 @@ defaults:
   - dataset: Nuscenes_cache
   - accelerator: default
   - runner: default
+  - exp: 448x800
 
 task_id: "0.0.0"
 log_root_prefix: ./magicdrive-log
@@ -23,5 +24,5 @@ fix_seed_within_batch: false
 resume_from_checkpoint: null
 resume_reset_scheduler: false
 validation_only: false
-# num_gpus: 1
+# num_gpus: 2
 # num_workers: 4

@@ -844,8 +844,18 @@ class BEVControlNetModel(ModelMixin, ConfigMixin):
 
         # 2. pre-process
         sample = self.conv_in(sample)
+        # if torch.isnan(sample).any():
+           # print("NaN found in sample!")
+        # print(sample.shape)
+        
+        print(f"controlnet_cond before embedding: {controlnet_cond.shape}")
 
         controlnet_cond = self.controlnet_cond_embedding(controlnet_cond)
+        # if torch.isnan(controlnet_cond).any():
+            # print("NaN found in controlnet_cond!")
+        # print(controlnet_cond.shape)
+
+        print(f"controlnet_cond after embedding: {controlnet_cond.shape}")
 
         sample += controlnet_cond
 

@@ -43,16 +43,16 @@ class BEVControlNetConditioningEmbedding(nn.Module):
             self.blocks.append(
                 nn.Conv2d(
                     channel_in, channel_out, kernel_size=3, padding=(2, 1),
-                    stride=2))
+                    stride=(2, 1)))
         channel_in = block_out_channels[-2]
         channel_out = block_out_channels[-1]
         self.blocks.append(
-            nn.Conv2d(channel_in, channel_in, kernel_size=3, padding=(2, 1))
+            nn.Conv2d(channel_in, channel_in, kernel_size=3, padding=(2, 1), stride=(1, 2))
         )
         self.blocks.append(
             nn.Conv2d(
                 channel_in, channel_out, kernel_size=3, padding=(2, 1),
-                stride=(2, 1)))
+                stride=(1, 1)))
 
         self.conv_out = zero_module(
             nn.Conv2d(
@@ -63,6 +63,8 @@ class BEVControlNetConditioningEmbedding(nn.Module):
             )
         )
 
+        # self.upsample = nn.Upsample(size=(56, 100), mode='bilinear', align_corners=False)
+
     def forward(self, conditioning):
         embedding = self.conv_in(conditioning)
         embedding = F.silu(embedding)
@@ -72,5 +74,7 @@ class BEVControlNetConditioningEmbedding(nn.Module):
             embedding = F.silu(embedding)
 
         embedding = self.conv_out(embedding)
+
+        # embedding = self.upsample(embedding) # 28, 50 -> 56, 100
 
         return embedding

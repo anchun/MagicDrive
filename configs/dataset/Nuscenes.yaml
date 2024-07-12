@@ -1,6 +1,7 @@
 dataset_type: NuScenesDatasetM
 dataset_root: data/nuscenes/
 dataset_process_root: data/nuscenes_mmdet3d_2/  # with visibility
+# dataset_process_root: data/nuscenes_mmdet3d_2_448x800/
 dataset_cache_file_tag: null
 dataset_cache_file:
   - null  # for train_pipeline
@@ -11,7 +12,8 @@ template: A driving scene image at {location}. {description}.
 # point_cloud_range: [-51.2, -51.2, -5.0, 51.2, 51.2, 3.0]
 # voxel_size: [0.1, 0.1, 0.2]
 # image_size: [256, 704]  # size of devfusion
-image_size: [224, 400]
+# image_size: [224, 400]
+image_size: [448, 800]
 map_bound:
   x: [-50.0, 50.0, 0.5]
   y: [-50.0, 50.0, 0.5]
@@ -36,7 +38,8 @@ back_resize: [896, 1600]  # (h, w)
 back_pad: [0, 4, 0, 0]  # left, top, right and bottom
 
 augment2d:
-  resize: [[0.25, 0.25]]
+        # resize: [[0.25, 0.25]]
+  resize: [[0.5, 0.5]]
   rotate: null
 
 aux_data:  # order is fix (v, c_offset, c_ohw, h), here only existence

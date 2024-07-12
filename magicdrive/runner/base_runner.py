@@ -434,8 +434,11 @@ class BaseRunner:
                     dtype=self.weight_dtype
                 )
             ).latent_dist.sample()
+            # print(f"After encode: {latents.shape}")
             latents = latents * self.vae.config.scaling_factor
+            # print(f"After scaling: {latents.shape}")
             latents = rearrange(latents, "(b n) c h w -> b n c h w", n=N_cam)
+            # print(f"After rearrange: {latents.shape}")
 
             # embed camera params, in (B, 6, 3, 7), out (B, 6, 189)
             # camera_emb = self._embed_camera(batch["camera_param"])

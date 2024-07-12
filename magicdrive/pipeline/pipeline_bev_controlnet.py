@@ -369,6 +369,8 @@ class StableDiffusionBEVControlNetPipeline(StableDiffusionControlNetPipeline):
                     controlnet_latent_model_input = latent_model_input
                     controlnet_prompt_embeds = prompt_embeds
                 controlnet_t = controlnet_t.repeat(len(controlnet_latent_model_input))
+                
+                print(f"image size: {image.shape}")
 
                 # fmt: off
                 down_block_res_samples, mid_block_res_sample, \
